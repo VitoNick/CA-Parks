@@ -1,0 +1,121 @@
+/*************************************************************************
+  🎯 CA Parks — dynamic offset + outcome logger (hoverless, single click)
+*************************************************************************/
+(() => {
+  const TARGET_H=8, TARGET_M=0, TARGET_S=0, TARGET_MS=0;
+  const BUTTON_SEL='#checkout-button';
+  const DRY_RUN=false;
+  const FUDGE_MS=50;           // added to RTT/2 (typ. 40–80 is reasonable)
+  const MANUAL_OFFSET_MS=-500; // set to a number to force; set to null to auto
+
+  // ————— Overlay —————
+  const css=`#rcx{position:fixed;top:16px;right:16px;z-index:2147483647;background:rgba(6,78,59,.92);
+  color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,.25);
+  font:700 18px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;pointer-events:none}
+  #rcx b{font-size:22px}#rcx small{opacity:.9;font-weight:600}
+  #rcx mark{background:#fff;color:#064e3b;padding:0 .3rem;border-radius:6px}`;
+  const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+  const box=document.createElement('div');box.id='rcx';
+  box.innerHTML=`<div><b id="rcx_t">--:--.––</b> <small id="rcx_s">syncing…</small></div>
+  <div><small>Target: <mark id="rcx_target">--:--:--</mark></small></div>
+  <div><small>Offset: <mark id="rcx_off">…</mark></small></div>`;
+  document.body.appendChild(box);
+  const $=id=>document.getElementById(id);
+
+  // ————— Time sync (server->world->local) + RTT —————
+  const timeout=(ms,p)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
+  async function getOffsetAndRTT(){
+    // 1) same-origin HEAD (best alignment + RTT)
+    try{
+      const t0=performance.now();
+      const res=await timeout(1200, fetch(location.origin+'/',{method:'HEAD',cache:'no-store',credentials:'same-origin'}));
+      const t1=performance.now();
+      const date=res.headers.get('Date');
+      if(date){
+        const serverMs=new Date(date).getTime();
+        const localAtRecv=Date.now()-(performance.now()-(t0+t1)/2);
+        const offset=serverMs-localAtRecv;
+        $('rcx_s').textContent=`server-synced (±~${Math.round((t1-t0)/2)}ms)`;
+        return {offset, rtt: t1-t0};
+      }
+    }catch{}
+    // 2) worldtimeapi fallback
+    try{
+      const t0=performance.now();
+      const r=await timeout(1500, fetch('https://worldtimeapi.org/api/ip',{cache:'no-store'}));
+      const t1=performance.now(); const j=await r.json();
+      const apiMs=(j.unixtime*1000)+(j.millisecond??0);
+      const localAtRecv=Date.now()-(performance.now()-(t0+t1)/2);
+      $('rcx_s').textContent=`synced (±~${Math.round((t1-t0)/2)}ms)`;
+      return {offset: apiMs-localAtRecv, rtt: t1-t0};
+    }catch{}
+    // 3) local
+    $('rcx_s').textContent='local clock';
+    return {offset:0, rtt: 0};
+  }
+  function buildTarget(baseNow){const t=new Date(baseNow);
+    t.setHours(TARGET_H,TARGET_M,TARGET_S,TARGET_MS);
+    if(t.getTime()<=baseNow)t.setDate(t.getDate()+1); return t;
+  }
+
+  // ————— DOM helpers + click —————
+  const btn=()=>document.querySelector(BUTTON_SEL);
+  function highlight(el){ if(!el) return; el.style.outline='3px solid #0ea5e9'; el.style.scrollMargin='80px';
+    el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  function clickOnce(){
+    const b=btn(); if(!b){ console.log('[rcx] No button'); return; }
+    highlight(b); b.focus({preventScroll:true});
+    if(DRY_RUN){ console.log('[rcx] DRY RUN'); return; }
+    if(typeof b.click==='function') b.click();
+    b.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
+    console.log('[rcx] CLICK sent');
+  }
+
+  // ————— Outcome logger (classifies modal text) —————
+  const classifyText=t=>{
+    t=t.toLowerCase();
+    if(/not permitted|last allowed arrival|restriction/.test(t)) return 'EARLY';
+    if(/not available/.test(t)) return 'TAKEN';
+    if(/added to cart|shopping cart|go to checkout/.test(t)) return 'ADDED';
+    return 'UNKNOWN';
+  };
+  new MutationObserver(() => {
+    const dlg=document.querySelector('[role="dialog"], .modal, .rrui-modal, .MuiDialog-root');
+    const txt=dlg?.innerText?.trim(); if(!txt) return;
+    const tag=classifyText(txt);
+    console.log(`[rcx] MODAL: ${tag} —`, txt.slice(0,160).replace(/\s+/g,' '),'…');
+  }).observe(document.body,{subtree:true,childList:true,characterData:true});
+
+  // ————— Main —————
+  (async()=>{
+    const {offset, rtt}=await getOffsetAndRTT();
+    const target=buildTarget(Date.now()+offset);
+    $('rcx_target').textContent=target.toLocaleTimeString();
+
+    const autoOffset = -(Math.round(rtt/2) + FUDGE_MS);
+    const clickOffset = (MANUAL_OFFSET_MS ?? autoOffset);
+    $('rcx_off').textContent = `${clickOffset} ms ${MANUAL_OFFSET_MS!==null?'(manual)':'(auto from RTT)'}`;
+
+    // Arm/highlight
+    const arm=setInterval(()=>{const b=btn(); if(b){highlight(b); $('rcx_s').textContent+=' | button armed'; clearInterval(arm);} },200);
+
+    // Always-on countdown (200ms) → rAF in last 5s → click at (target + offset)
+    let base=setInterval(()=>{const now=Date.now()+offset; const diff=target-now;
+      const mm=Math.max(0,Math.floor(diff/60000));
+      const ss=Math.max(0,Math.floor((diff%60000)/1000));
+      const cs=Math.max(0,Math.floor((diff%1000)/10));
+      $('rcx_t').textContent=`${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+    },200);
+
+    const preDelay=Math.max(0, target-(Date.now()+offset)-5000);
+    setTimeout(()=>{ clearInterval(base);
+      (function tick(){
+        const now=Date.now()+offset; const diff=target-now;
+        if (diff <= clickOffset) { $('rcx_t').textContent='00:00.00'; $('rcx_s').textContent=`GO (offset ${clickOffset}ms)`; clickOnce(); return; }
+        const mm=Math.floor(diff/60000), ss=Math.floor((diff%60000)/1000), cs=Math.floor((diff%1000)/10);
+        $('rcx_t').textContent=`${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+        requestAnimationFrame(tick);
+      })();
+    }, preDelay);
+  })();
+})();

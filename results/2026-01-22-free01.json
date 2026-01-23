@@ -1,0 +1,132 @@
+{
+  "attempt": {
+    "tsIso": "2026-01-22T21:26:58.349Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1700,
+    "scheduledFireAtMs": 1769117218300,
+    "actualAtClickMs": 1769117218317,
+    "deltaMs": 17,
+    "serverDateMs": 1769116929000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/6/358",
+    "cartCountBefore": null,
+    "net": {
+      "sampleCount": 3,
+      "totalAfterClick": 8,
+      "best": {
+        "name": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+        "initiatorType": "xmlhttprequest",
+        "startMs": 161831,
+        "durMs": 720,
+        "transferSize": 0,
+        "timingMasked": true
+      },
+      "recent": [
+        {
+          "name": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+          "initiatorType": "xmlhttprequest",
+          "startMs": 161831,
+          "durMs": 720,
+          "transferSize": 0,
+          "timingMasked": true
+        },
+        {
+          "name": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "initiatorType": "xmlhttprequest",
+          "startMs": 161675,
+          "durMs": 131,
+          "transferSize": 0,
+          "timingMasked": true
+        },
+        {
+          "name": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "initiatorType": "xmlhttprequest",
+          "startMs": 161877,
+          "durMs": 110,
+          "transferSize": 0,
+          "timingMasked": true
+        }
+      ]
+    },
+    "netHook": {
+      "sampleCount": 3,
+      "best": {
+        "kind": "xhr",
+        "tsIso": "2026-01-22T21:26:58.750Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 157
+      },
+      "recent": [
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-22T21:26:58.750Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 157
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-22T21:26:58.931Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 136
+        },
+        {
+          "kind": "fetch",
+          "tsIso": "2026-01-22T21:26:48.362Z",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 0,
+          "durMs": 61
+        }
+      ]
+    },
+    "outcome": {
+      "ok": true,
+      "reason": "URL changed to cart-ish route",
+      "dtMs": 1149,
+      "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+      "endCartCount": null,
+      "modalText": "0 people are viewing this siteGroup Campsite #GPLO$180.00Reservation DateThu, 07/02/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy25Max Vehicles6Check-In S"
+    }
+  },
+  "netRes": null,
+  "netHook": {
+    "sampleCount": 3,
+    "best": {
+      "kind": "xhr",
+      "tsIso": "2026-01-22T21:26:58.750Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+      "status": 200,
+      "durMs": 157
+    },
+    "recent": [
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-22T21:26:58.750Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 157
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-22T21:26:58.931Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 136
+      },
+      {
+        "kind": "fetch",
+        "tsIso": "2026-01-22T21:26:48.362Z",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 0,
+        "durMs": 61
+      }
+    ]
+  }
+}

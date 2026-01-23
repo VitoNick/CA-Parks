@@ -1,0 +1,457 @@
+/*************************************************************************
+  ✅ CA Parks — Always-visible countdown + single human-like click
+  - Shows countdown immediately (updates every 200ms)
+  - Same-origin Date-header time sync (best RTT) + jitter estimate (trust gate)
+  - Re-sync at T-30s (optional)
+  - Switches to high-precision loop + beeps only in last 5s
+  - Safe single click at T=0 (+ manual ms adjust)
+  - NEW: click timing log + outcome detection + attempt history
+*************************************************************************/
+(() => {
+  /* ===== CONFIG ===== */
+  const TARGET_H=8, TARGET_M=0, TARGET_S=0, TARGET_MS=0; // change if needed
+  const BUTTON_SEL = '#checkout-button';
+  const DRY_RUN = false;    // true = no click, only logs/highlight
+  const BEEP = true;        // beeps only in the final 5 seconds
+
+  // ✅ Manual click timing adjustment (ms)
+  // negative = earlier, positive = later
+  const CLICK_ADJUST_MS = -500; // you're testing -1000, -1500 etc
+
+  // ✅ Time sync probe target (same-origin lightweight)
+  // NOTE: keep it tiny. Date header is usually 1-second resolution, so trust gate matters.
+  const SYNC_PROBE_BASE = `${location.origin}/favicon.ico`;
+
+  const TIME_SAMPLES = 11;
+  const TIME_TIMEOUT_MS = 1200;
+
+  // ✅ Re-sync config (T-30s)
+  const RESYNC_ENABLED = true;
+  const RESYNC_AT_MS_BEFORE = 30_000;
+  const RESYNC_SAMPLES = 5;
+  const RESYNC_TIMEOUT_MS = 900;
+
+  // ✅ Trust gate: only accept sync if it looks clean
+  const TRUST_MAX_RTT_MS = 180;
+  const TRUST_MAX_JITTER_MS = 120;
+
+  // ✅ Outcome detection
+  const OUTCOME_TIMEOUT_MS = 5000;  // watch for success/failure for 5s after click
+
+  // ✅ Optional: if you know a cart count selector on this site, add it here
+  // (leave as null to auto-detect basic header cart count heuristics)
+  const CART_COUNT_SEL = null;
+  /* ================== */
+
+  // Overlay (top-right)
+  const css = `
+    #rcx{position:fixed;top:16px;right:16px;z-index:2147483647;
+      background:rgba(6,78,59,.92);color:#fff;padding:10px 14px;border-radius:12px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25);font:700 18px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      pointer-events:none}
+    #rcx b{font-size:22px} #rcx small{opacity:.9;font-weight:600}
+    #rcx mark{background:#fff;color:#064e3b;padding:0 .3rem;border-radius:6px}
+    .rcx-hl{outline:3px solid #0ea5e9 !important;scroll-margin:80px}
+  `;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+  const box=document.createElement('div'); box.id='rcx';
+  box.innerHTML=`<div><b id="rcx_t">--:--.––</b> <small id="rcx_s">syncing…</small></div>
+                 <div><small>Target: <mark id="rcx_target">--:--:--</mark></small></div>
+                 <div><small>Fire@ (adj): <mark id="rcx_fire">--:--:--</mark></small></div>`;
+  document.body.appendChild(box);
+  const $ = id => document.getElementById(id);
+
+  // Attempt history
+  window.__rcxAttempts = window.__rcxAttempts || [];
+
+  // Utilities
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const clampText = (s, n=160) => (s || '').replace(/\s+/g,' ').trim().slice(0, n);
+
+  function probeUrl() {
+    // cache buster every call
+    return `${SYNC_PROBE_BASE}?rcx=${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  }
+
+  // Time helpers
+  function buildTarget(baseNow){
+    const t=new Date(baseNow);
+    t.setHours(TARGET_H,TARGET_M,TARGET_S,TARGET_MS);
+    if (t.getTime()<=baseNow) t.setDate(t.getDate()+1);
+    return t;
+  }
+
+  function isGoodSync(s){
+    if (!s || s.bestRttMs == null) return false;
+    if (s.bestRttMs > TRUST_MAX_RTT_MS) return false;
+    if ((s.jitterMs ?? 999999) > TRUST_MAX_JITTER_MS) return false;
+    return true;
+  }
+
+  function fmtSync(sync, label){
+    if (!sync || sync.bestRttMs == null) return `${label}: local clock`;
+    const o = Math.round(sync.offsetMs);
+    const j = Math.round(sync.jitterMs ?? 0);
+    const r = Math.round(sync.bestRttMs);
+    return `${label}: off ${o}ms | jit ${j}ms | rtt ${r}ms | n=${sync.samplesUsed}`;
+  }
+
+  // --- Date-header time sync (best RTT) + jitter ---
+  async function syncOffset({ samples = 11, timeoutMs = 1200 }) {
+    const results = [];
+
+    for (let i = 0; i < samples; i++) {
+      try {
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), timeoutMs);
+
+        const url = probeUrl();
+        const t0p = performance.now();
+        const t0 = Date.now();
+
+        const res = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          credentials: "same-origin",
+          signal: ctrl.signal,
+        });
+
+        const t1p = performance.now();
+        const t1 = Date.now();
+        clearTimeout(to);
+
+        if (!res.ok) continue;
+
+        const dateHeader = res.headers.get("date");
+        if (!dateHeader) continue;
+
+        const serverMs = new Date(dateHeader).getTime();
+        if (!Number.isFinite(serverMs)) continue;
+
+        const rtt = t1p - t0p;
+        const localMid = (t0 + t1) / 2;
+        const offset = serverMs - localMid;
+
+        results.push({ offset, rtt });
+        await sleep(80 + Math.random() * 40);
+      } catch {
+        // ignore failed sample
+      }
+    }
+
+    if (!results.length) return { offsetMs: 0, jitterMs: null, bestRttMs: null, samplesUsed: 0 };
+
+    results.sort((a,b) => a.rtt - b.rtt);
+    const best = results[0];
+
+    const top = results
+      .slice(0, Math.min(5, results.length))
+      .map(x => x.offset)
+      .sort((a,b)=>a-b);
+
+    const jitter = top.length >= 2 ? (top[top.length-1] - top[0]) : 0;
+
+    return { offsetMs: best.offset, jitterMs: jitter, bestRttMs: best.rtt, samplesUsed: results.length };
+  }
+
+  // Button helpers
+  function btn(){ return document.querySelector(BUTTON_SEL); }
+  function highlight(el){
+    if(!el) return;
+    el.classList.add('rcx-hl');
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  // Try to read a cart count (best-effort)
+  function getCartCount() {
+    try {
+      if (CART_COUNT_SEL) {
+        const el = document.querySelector(CART_COUNT_SEL);
+        const n = el ? parseInt(el.textContent.trim(), 10) : NaN;
+        return Number.isFinite(n) ? n : null;
+      }
+      // heuristic: look for a small badge near a cart icon
+      const candidates = [...document.querySelectorAll('a,button,span,div')]
+        .filter(el => /cart/i.test(el.getAttribute('aria-label')||'') || /cart/i.test(el.textContent||''))
+        .slice(0, 40);
+
+      for (const el of candidates) {
+        const badge = el.querySelector?.('span,div');
+        const txt = (badge?.textContent || '').trim();
+        const n = parseInt(txt, 10);
+        if (Number.isFinite(n)) return n;
+      }
+    } catch {}
+    return null;
+  }
+
+  // Grab modal-ish message text (best-effort)
+  function getModalText() {
+    try {
+      const modals = [...document.querySelectorAll('[role="dialog"], .modal, .modal-dialog, .MuiDialog-root, .v-dialog, .cdk-overlay-container')]
+        .filter(el => el && el.offsetParent !== null); // visible-ish
+
+      for (const m of modals) {
+        const t = clampText(m.textContent, 220);
+        if (t && t.length > 20) return t;
+      }
+    } catch {}
+    return null;
+  }
+
+  // Outcome watcher after click
+  async function watchOutcome({ startUrl, startCartCount, timeoutMs = 5000 }) {
+    const tStart = performance.now();
+
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = (result) => {
+        if (done) return;
+        done = true;
+        try { obs.disconnect(); } catch {}
+        resolve({
+          ...result,
+          dtMs: Math.round(performance.now() - tStart),
+          endUrl: location.href,
+          endCartCount: getCartCount(),
+          modalText: getModalText(),
+        });
+      };
+
+      const check = () => {
+        // 1) URL changed to something that looks like cart/checkout/precart
+        const urlNow = location.href;
+        if (urlNow !== startUrl && /cart|checkout|precart|ReservationPreCart|ShoppingCart/i.test(urlNow)) {
+          finish({ ok: true, reason: 'URL changed to cart-ish route' });
+          return;
+        }
+
+        // 2) cart count increased
+        const cc = getCartCount();
+        if (startCartCount != null && cc != null && cc > startCartCount) {
+          finish({ ok: true, reason: `Cart count increased (${startCartCount}→${cc})` });
+          return;
+        }
+
+        // 3) error modal appeared
+        const mt = getModalText();
+        if (mt) {
+          // If it contains obvious error language, mark as fail
+          if (/not available|not permitted|restriction|choose a new stay|not allowed|try again|unable/i.test(mt)) {
+            finish({ ok: false, reason: 'Error modal detected' });
+            return;
+          }
+        }
+
+        // timeout
+        if (performance.now() - tStart >= timeoutMs) {
+          finish({ ok: null, reason: 'No clear signal (timeout)' });
+        }
+      };
+
+      const obs = new MutationObserver(check);
+      obs.observe(document.documentElement, { subtree: true, childList: true, attributes: true });
+      // also poll lightly in case no mutations occur
+      const poll = setInterval(() => {
+        if (done) return clearInterval(poll);
+        check();
+      }, 150);
+
+      check();
+    });
+  }
+
+  // Click timing log
+  async function logClickTiming({ fireAtMs, offsetUsed, clockSource, startCartCount, startUrl }) {
+    const actualMs = Date.now() + offsetUsed;
+    const deltaMs = actualMs - fireAtMs; // +late, -early
+
+    // Optional: sample server Date header at click moment (best-effort)
+    let serverDateMs = null;
+    try {
+      const r = await fetch(probeUrl(), { cache: "no-store", credentials: "same-origin" });
+      const dh = r.headers.get("date");
+      if (r.ok && dh) serverDateMs = new Date(dh).getTime();
+    } catch {}
+
+    const record = {
+      tsIso: new Date().toISOString(),
+      clockSource,
+      offsetUsedMs: Math.round(offsetUsed),
+      clickAdjustMs: CLICK_ADJUST_MS,
+      scheduledFireAtMs: fireAtMs,
+      actualAtClickMs: actualMs,
+      deltaMs: Math.round(deltaMs),
+      serverDateMs,
+      urlAtClick: startUrl,
+      cartCountBefore: startCartCount
+    };
+
+    window.__rcxAttempts.push(record);
+    console.log('[rcx] CLICK TIMING', record);
+
+    // show compact info
+    $('rcx_s').textContent += ` | ${clockSource} | Δclick ${Math.round(deltaMs)}ms`;
+    if (serverDateMs != null) $('rcx_s').textContent += ` | srv ${new Date(serverDateMs).toLocaleTimeString()}`;
+  }
+
+  // Safe single click
+  function safeClick(){
+    const b=btn();
+    if(!b){ console.log('[rcx] No button to click'); return false; }
+    if (DRY_RUN){ console.log('[rcx] DRY RUN: would click', b); return true; }
+    console.log('[rcx] CLICK');
+    b.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
+    if (typeof b.click === 'function') b.click();
+    return true;
+  }
+
+  // Optional beep
+  let beep=()=>{}; if (BEEP) try{
+    const ac=new (window.AudioContext||window.webkitAudioContext)();
+    beep=(f=880,d=90,g=.16)=>{ const o=ac.createOscillator(),G=ac.createGain(); o.type='square'; o.frequency.value=f; G.gain.value=g; o.connect(G); G.connect(ac.destination); o.start(); setTimeout(()=>o.stop(),d); };
+  }catch{}
+
+  (async () => {
+    let offset = 0;
+    let clockSource = 'LOCAL';
+
+    // Initial sync
+    const sync0 = await syncOffset({ samples: TIME_SAMPLES, timeoutMs: TIME_TIMEOUT_MS });
+
+    if (isGoodSync(sync0)) {
+      offset = sync0.offsetMs || 0;
+      clockSource = 'SYNC';
+      $('rcx_s').textContent = fmtSync(sync0, 'synced') + ' | USING SYNC';
+    } else {
+      offset = 0;
+      clockSource = 'LOCAL';
+      $('rcx_s').textContent = `${fmtSync(sync0, 'synced')} | rejected → USING LOCAL`;
+    }
+
+    // Targets
+    const target = buildTarget(Date.now() + offset);
+    const fireAt = new Date(target.getTime() + CLICK_ADJUST_MS);
+
+    $('rcx_target').textContent = target.toLocaleTimeString();
+    $('rcx_fire').textContent = fireAt.toLocaleTimeString() + (CLICK_ADJUST_MS ? ` (${CLICK_ADJUST_MS}ms)` : '');
+
+    // Arm/highlight when button appears
+    const arm=setInterval(()=>{ const b=btn(); if(b){ highlight(b); $('rcx_s').textContent += ' | button armed'; clearInterval(arm); } }, 200);
+
+    // Re-sync at T-30s (optional)
+    if (RESYNC_ENABLED) {
+      const resyncDelay = Math.max(0, (fireAt - (Date.now() + offset)) - RESYNC_AT_MS_BEFORE);
+
+      setTimeout(async () => {
+        const prev = offset;
+        const prevSrc = clockSource;
+
+        const sync1 = await syncOffset({ samples: RESYNC_SAMPLES, timeoutMs: RESYNC_TIMEOUT_MS });
+
+        let applied = false;
+        if (isGoodSync(sync1)) {
+          offset = sync1.offsetMs || 0;
+          clockSource = 'SYNC';
+          applied = true;
+        } else {
+          // keep whatever we had (do NOT force local unless you want to)
+          // If you want to force local on bad resync, uncomment:
+          // offset = 0; clockSource = 'LOCAL';
+        }
+
+        const delta = Math.round(offset - prev);
+        $('rcx_s').textContent =
+          `${fmtSync(sync0,'synced')} | ${fmtSync(sync1,'resync')} | ` +
+          (applied ? `applied` : `rejected`) + ` | Δ${delta}ms | USING ${clockSource}`;
+
+        console.log('[rcx] RESYNC', {
+          prevOffsetMs: Math.round(prev),
+          prevClockSource: prevSrc,
+          newOffsetMs: Math.round(offset),
+          newClockSource: clockSource,
+          applied,
+          deltaMs: delta,
+          sync1
+        });
+      }, resyncDelay);
+    }
+
+    // Always-on countdown (every 200ms)
+    let baseTimer = setInterval(() => {
+      const now = Date.now() + offset;
+      const diff = fireAt - now;
+      const mm=Math.max(0, Math.floor(diff/60000));
+      const ss=Math.max(0, Math.floor((diff%60000)/1000));
+      const cs=Math.max(0, Math.floor((diff%1000)/10));
+      $('rcx_t').textContent = `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+    }, 200);
+
+    // High-precision loop in final 5s, then click at T=0
+    const preDelay = Math.max(0, fireAt - (Date.now() + offset) - 5000);
+    setTimeout(()=> {
+      clearInterval(baseTimer);
+
+      (function tick(){
+        const now = Date.now() + offset;
+        const diff = fireAt - now;
+
+        if (diff <= 0){
+          $('rcx_t').textContent='00:00.00';
+          $('rcx_s').textContent += ' | GO';
+
+          const startUrl = location.href;
+          const startCartCount = getCartCount();
+          const fireAtMs = fireAt.getTime();
+          const offsetUsed = offset;
+
+          const clicked = safeClick();
+
+          // log click timing + outcome
+          if (clicked) {
+            logClickTiming({
+              fireAtMs,
+              offsetUsed,
+              clockSource,
+              startCartCount,
+              startUrl
+            });
+
+            watchOutcome({ startUrl, startCartCount, timeoutMs: OUTCOME_TIMEOUT_MS })
+              .then((out) => {
+                const summary = {
+                  ok: out.ok,
+                  reason: out.reason,
+                  dtMs: out.dtMs,
+                  endUrl: out.endUrl,
+                  endCartCount: out.endCartCount,
+                  modalText: out.modalText
+                };
+
+                window.__rcxAttempts[window.__rcxAttempts.length - 1] = {
+                  ...window.__rcxAttempts[window.__rcxAttempts.length - 1],
+                  outcome: summary
+                };
+
+                console.log('[rcx] OUTCOME', summary);
+
+                // overlay hint
+                const tag = out.ok === true ? 'SUCCESS?' : out.ok === false ? 'FAIL' : 'UNKNOWN';
+                $('rcx_s').textContent += ` | ${tag}: ${clampText(out.reason, 60)}`;
+              });
+          }
+
+          return;
+        }
+
+        const mm=Math.floor(diff/60000);
+        const ss=Math.floor((diff%60000)/1000);
+        const cs=Math.floor((diff%1000)/10);
+        $('rcx_t').textContent=`${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+
+        if (mm===0 && ss<=5) beep(880,80,.2);
+        requestAnimationFrame(tick);
+      })();
+    }, preDelay);
+  })();
+})();

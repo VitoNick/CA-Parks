@@ -1,0 +1,31 @@
+// "fired before booking window opened"
+
+{
+  "tsIso": "2026-01-08T15:59:57.911Z",
+  "clockSource": "LOCAL",
+  "clickAdjustMs": -2140,
+  "scheduledFireAtMs": 1767887997860,
+  "actualAtClickMs": 1767887997879,
+  "deltaMs": 19,
+  "serverDateMs": 1767887709000,
+  "urlAtClick": "https://www.reservecalifornia.com/park/709/670",
+  "cartCountBefore": null,
+  "net": {
+    "sampleCount": 1,
+    "best": {
+      "kind": "fetch",
+      "tsIso": "2026-01-08T15:58:42.501Z",
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-QTPRX6L8X7&gtm=45je6160v9119792419z89221678628za20gzb9221678628zd9221678628&_p=1767887468031&gcd=13l3l3l3l1l1",
+      "status": 0,
+      "durMs": 104
+    }
+  },
+  "outcome": {
+    "ok": true,
+    "reason": "URL changed to cart-ish route",
+    "dtMs": 1037,
+    "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+    "endCartCount": null,
+    "modalText": "18 people are viewing this sitePremium Campsite #051$70.00Reservation DateWed, 07/08/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy8Max Vehicles3Check-In S"
+  }
+}

@@ -1,0 +1,607 @@
+/*************************************************************************
+  ✅ CA Parks — Local-clock countdown + single click + logging
+  - Uses ONLY local time (Date.now)
+  - Always-visible countdown (updates every 200ms)
+  - High-precision final 5s loop + optional beeps
+  - Safe single click at T=0 (+ manual ms adjust) on BUTTON_SEL
+  - Logs: clock source, click timing error (Δclick), and outcome signals
+*************************************************************************/
+(() => {
+	/* ===== CONFIG ===== */
+	const TARGET_H = 8,
+		TARGET_M = 0,
+		TARGET_S = 0,
+		TARGET_MS = 0; // target time local
+	const BUTTON_SEL = "#checkout-button";
+	const DRY_RUN = false;
+	const BEEP = true;
+
+	// Manual timing adjustment
+	// negative = earlier, positive = later
+	const CLICK_ADJUST_MS = -1840; // you’re testing -1000, -1500, etc.
+
+	// Outcome detection window after click
+	const OUTCOME_TIMEOUT_MS = 5000;
+
+	// Optional: if you know cart count selector, put it here (else heuristic)
+	const CART_COUNT_SEL = null;
+
+	// Optional: lightweight same-origin probe used ONLY for logging server Date at click time.
+	// If you don't want *any* extra requests, set SERVER_PROBE_URL = null.
+	const SERVER_PROBE_URL = `${location.origin}/favicon.ico?rcx=${Date.now()}`;
+	/* ================== */
+
+	// ===== Network timing hooks (fetch + XHR) =====
+	window.__rcxNet = window.__rcxNet || [];
+	const RCX_DENY = [
+		"google-analytics.com",
+		"facebook.com/tr",
+		"doubleclick.net",
+		"googletagmanager.com",
+	];
+
+	const RCX_NET_MATCH = [
+		"recreation-management.tylerapp.com/rdr/",
+		"/rdr/",
+		"/Facilities/",
+		"SelectReservationPreCart",
+		"PreCart",
+		"ShoppingCart",
+		"AddToCart",
+		"Hold",
+	];
+
+	function rcxIsInterestingUrl(url) {
+		try {
+			const u = String(url);
+			if (RCX_DENY.some((d) => u.includes(d))) return false;
+			return RCX_NET_MATCH.some((s) => u.includes(s));
+		} catch {
+			return false;
+		}
+	}
+
+	function rcxTrimUrl(url) {
+		try {
+			const u = new URL(url, location.href);
+			// keep path + key query bits; strip noisy params
+			return (
+				u.origin + u.pathname + (u.search ? u.search.slice(0, 120) : "")
+			);
+		} catch {
+			return String(url).slice(0, 200);
+		}
+	}
+
+	// Hook fetch
+	(() => {
+		const _fetch = window.fetch;
+		if (!_fetch || _fetch.__rcxHooked) return;
+
+		async function wrappedFetch(input, init) {
+			const url =
+				typeof input === "string"
+					? input
+					: input && input.url
+						? input.url
+						: String(input);
+			const interesting = rcxIsInterestingUrl(url);
+
+			const t0 = performance.now();
+			try {
+				const res = await _fetch(input, init);
+				const t1 = performance.now();
+
+				if (interesting) {
+					const entry = {
+						kind: "fetch",
+						tsIso: new Date().toISOString(),
+						url: rcxTrimUrl(url),
+						status: res.status,
+						durMs: Math.round(t1 - t0),
+					};
+					window.__rcxNet.push(entry);
+					console.log("[rcx][net]", entry);
+				}
+				return res;
+			} catch (err) {
+				const t1 = performance.now();
+				if (interesting) {
+					const entry = {
+						kind: "fetch",
+						tsIso: new Date().toISOString(),
+						url: rcxTrimUrl(url),
+						status: null,
+						error: String(err && err.message ? err.message : err),
+						durMs: Math.round(t1 - t0),
+					};
+					window.__rcxNet.push(entry);
+					console.log("[rcx][net]", entry);
+				}
+				throw err;
+			}
+		}
+
+		wrappedFetch.__rcxHooked = true;
+		window.fetch = wrappedFetch;
+	})();
+
+	// Hook XHR
+	(() => {
+		const _open = XMLHttpRequest.prototype.open;
+		const _send = XMLHttpRequest.prototype.send;
+		if (_send.__rcxHooked) return;
+
+		XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+			this.__rcx = { method, url: String(url) };
+			return _open.call(this, method, url, ...rest);
+		};
+
+		XMLHttpRequest.prototype.send = function (...args) {
+			const meta = this.__rcx || { method: "?", url: "?" };
+			const interesting = rcxIsInterestingUrl(meta.url);
+			const t0 = performance.now();
+
+			const done = () => {
+				const t1 = performance.now();
+				if (!interesting) return;
+				const entry = {
+					kind: "xhr",
+					tsIso: new Date().toISOString(),
+					method: meta.method,
+					url: rcxTrimUrl(meta.url),
+					status:
+						typeof this.status === "number" ? this.status : null,
+					durMs: Math.round(t1 - t0),
+				};
+				window.__rcxNet.push(entry);
+				console.log("[rcx][net]", entry);
+			};
+
+			this.addEventListener("loadend", done, { once: true });
+			return _send.apply(this, args);
+		};
+
+		XMLHttpRequest.prototype.send.__rcxHooked = true;
+	})();
+
+	// ===== Navigation timing capture =====
+	window.__rcxNav = window.__rcxNav || [];
+
+	function rcxCaptureNav(label = "nav") {
+		try {
+			const nav = performance.getEntriesByType("navigation").slice(-1)[0];
+			if (!nav) return;
+
+			const rec = {
+				label,
+				tsIso: new Date().toISOString(),
+				type: nav.type,
+				startTimeMs: Math.round(nav.startTime),
+				domContentLoadedMs: Math.round(nav.domContentLoadedEventEnd),
+				loadEventMs: Math.round(nav.loadEventEnd),
+				transferSize: nav.transferSize,
+				decodedBodySize: nav.decodedBodySize,
+			};
+			window.__rcxNav.push(rec);
+			console.log("[rcx][nav]", rec);
+		} catch {}
+	}
+
+	// ===== Beacon timing hook =====
+	(() => {
+		const orig = navigator.sendBeacon;
+		if (!orig || orig.__rcxHooked) return;
+
+		navigator.sendBeacon = function (url, data) {
+			const t0 = performance.now();
+			const ok = orig.call(this, url, data);
+			const t1 = performance.now();
+
+			const entry = {
+				kind: "beacon",
+				tsIso: new Date().toISOString(),
+				url: String(url).slice(0, 220),
+				ok,
+				durMs: Math.round(t1 - t0),
+			};
+			window.__rcxNet.push(entry);
+			console.log("[rcx][net]", entry);
+			return ok;
+		};
+
+		navigator.sendBeacon.__rcxHooked = true;
+	})();
+
+	// Overlay (top-right)
+	const css = `
+        #rcx{position:fixed;top:16px;right:16px;z-index:2147483647;
+        background:rgba(6,78,59,.92);color:#fff;padding:10px 14px;border-radius:12px;
+        box-shadow:0 8px 18px rgba(0,0,0,.25);font:700 18px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+        pointer-events:none}
+        #rcx b{font-size:22px} #rcx small{opacity:.9;font-weight:600}
+        #rcx mark{background:#fff;color:#064e3b;padding:0 .3rem;border-radius:6px}
+        .rcx-hl{outline:3px solid #0ea5e9 !important;scroll-margin:80px}
+    `;
+	const st = document.createElement("style");
+	st.textContent = css;
+	document.head.appendChild(st);
+	const box = document.createElement("div");
+	box.id = "rcx";
+	box.innerHTML = `<div><b id="rcx_t">--:--.––</b> <small id="rcx_s">local clock</small></div>
+                    <div><small>Target: <mark id="rcx_target">--:--:--</mark></small></div>
+                    <div><small>Fire@ (adj): <mark id="rcx_fire">--:--:--</mark></small></div>`;
+	document.body.appendChild(box);
+	const $ = (id) => document.getElementById(id);
+
+	// Attempt history
+	window.__rcxAttempts = window.__rcxAttempts || [];
+
+	const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+	const clampText = (s, n = 200) =>
+		(s || "").replace(/\s+/g, " ").trim().slice(0, n);
+
+	// Build next target time (local)
+	function buildTarget(baseNow) {
+		const t = new Date(baseNow);
+		t.setHours(TARGET_H, TARGET_M, TARGET_S, TARGET_MS);
+		if (t.getTime() <= baseNow) t.setDate(t.getDate() + 1);
+		return t;
+	}
+
+	// Button helpers
+	function btn() {
+		return document.querySelector(BUTTON_SEL);
+	}
+	function highlight(el) {
+		if (!el) return;
+		el.classList.add("rcx-hl");
+		el.scrollIntoView({ behavior: "smooth", block: "center" });
+	}
+
+	// Best-effort cart count
+	function getCartCount() {
+		try {
+			if (CART_COUNT_SEL) {
+				const el = document.querySelector(CART_COUNT_SEL);
+				const n = el ? parseInt(el.textContent.trim(), 10) : NaN;
+				return Number.isFinite(n) ? n : null;
+			}
+			// heuristic: look for cart-ish elements that include a number badge
+			const cartish = [...document.querySelectorAll("a,button,span,div")]
+				.filter(
+					(el) =>
+						/cart/i.test(el.getAttribute("aria-label") || "") ||
+						/cart/i.test(el.textContent || "")
+				)
+				.slice(0, 60);
+
+			for (const el of cartish) {
+				const txt = (el.textContent || "").trim();
+				const m = txt.match(/\b(\d{1,2})\b/);
+				if (m) return parseInt(m[1], 10);
+			}
+		} catch {}
+		return null;
+	}
+
+	// Best-effort modal/error message
+	function getModalText() {
+		try {
+			const modals = [
+				...document.querySelectorAll(
+					'[role="dialog"], .modal, .modal-dialog'
+				),
+			].filter((el) => el && el.offsetParent !== null);
+
+			for (const m of modals) {
+				const t = clampText(m.textContent, 240);
+				if (t && t.length > 20) return t;
+			}
+		} catch {}
+		return null;
+	}
+
+	// Outcome watcher
+	async function watchOutcome({
+		startUrl,
+		startCartCount,
+		timeoutMs = 5000,
+	}) {
+		const tStart = performance.now();
+
+		return new Promise((resolve) => {
+			let done = false;
+			const finish = (result) => {
+				if (done) return;
+				done = true;
+				try {
+					obs.disconnect();
+				} catch {}
+				resolve({
+					...result,
+					dtMs: Math.round(performance.now() - tStart),
+					endUrl: location.href,
+					endCartCount: getCartCount(),
+					modalText: getModalText(),
+				});
+			};
+
+			const check = () => {
+				const urlNow = location.href;
+
+				// URL became cart-ish
+				if (
+					urlNow !== startUrl &&
+					/cart|checkout|precart|ReservationPreCart|ShoppingCart/i.test(
+						urlNow
+					)
+				) {
+					finish({
+						ok: true,
+						reason: "URL changed to cart-ish route",
+					});
+					return;
+				}
+
+				// Cart count increased
+				const cc = getCartCount();
+				if (
+					startCartCount != null &&
+					cc != null &&
+					cc > startCartCount
+				) {
+					finish({
+						ok: true,
+						reason: `Cart count increased (${startCartCount}→${cc})`,
+					});
+					return;
+				}
+
+				// Error modal detected
+				const mt = getModalText();
+				if (
+					mt &&
+					/not available|not permitted|restriction|choose a new stay|not allowed|unable/i.test(
+						mt
+					)
+				) {
+					finish({ ok: false, reason: "Error modal detected" });
+					return;
+				}
+
+				// Timeout
+				if (performance.now() - tStart >= timeoutMs) {
+					finish({ ok: null, reason: "No clear signal (timeout)" });
+				}
+			};
+
+			const obs = new MutationObserver(check);
+			obs.observe(document.documentElement, {
+				subtree: true,
+				childList: true,
+				attributes: true,
+			});
+			const poll = setInterval(() => {
+				if (done) return clearInterval(poll);
+				check();
+			}, 150);
+
+			check();
+		});
+	}
+
+	// Safe single click
+	function safeClick() {
+		const b = btn();
+		if (!b) {
+			console.log("[rcx] No button to click");
+			return false;
+		}
+		if (DRY_RUN) {
+			console.log("[rcx] DRY RUN: would click", b);
+			return true;
+		}
+		console.log("[rcx] CLICK");
+		b.dispatchEvent(
+			new MouseEvent("click", { bubbles: true, cancelable: true })
+		);
+		if (typeof b.click === "function") b.click();
+		return true;
+	}
+
+	// Optional beep
+	let beep = () => {};
+	if (BEEP)
+		try {
+			const ac = new (window.AudioContext || window.webkitAudioContext)();
+			beep = (f = 880, d = 90, g = 0.16) => {
+				const o = ac.createOscillator(),
+					G = ac.createGain();
+				o.type = "square";
+				o.frequency.value = f;
+				G.gain.value = g;
+				o.connect(G);
+				G.connect(ac.destination);
+				o.start();
+				setTimeout(() => o.stop(), d);
+			};
+		} catch {}
+
+	async function logClickAttempt({ fireAtMs, startUrl, startCartCount }) {
+		const actualMs = Date.now();
+		const perfAtClick = performance.now();
+		const deltaMs = actualMs - fireAtMs; // +late, -early
+
+		// Optional: server Date header at click time (best-effort)
+		let serverDateMs = null;
+		if (SERVER_PROBE_URL) {
+			try {
+				const r = await fetch(SERVER_PROBE_URL, {
+					cache: "no-store",
+					credentials: "same-origin",
+				});
+				const dh = r.headers.get("date");
+				if (r.ok && dh) serverDateMs = new Date(dh).getTime();
+			} catch {}
+		}
+
+		const record = {
+			tsIso: new Date().toISOString(),
+			clockSource: "LOCAL",
+			clickAdjustMs: CLICK_ADJUST_MS,
+			scheduledFireAtMs: fireAtMs,
+			actualAtClickMs: actualMs,
+			deltaMs: Math.round(deltaMs),
+			serverDateMs,
+			urlAtClick: startUrl,
+			cartCountBefore: startCartCount,
+		};
+
+		window.__rcxAttempts.push(record);
+		console.log("[rcx] CLICK TIMING", record);
+
+		$("rcx_s").textContent += ` | LOCAL | Δclick ${Math.round(deltaMs)}ms`;
+		// NOTE: server Date headers are often rounded/cached; keep serverDateMs in record but don't display it
+		// if (serverDateMs != null) $('rcx_s').textContent += ` | srv ${new Date(serverDateMs).toLocaleTimeString()}`;
+
+		// Watch outcome and attach it
+		const out = await watchOutcome({
+			startUrl,
+			startCartCount,
+			timeoutMs: OUTCOME_TIMEOUT_MS,
+		});
+
+		const summary = {
+			ok: out.ok,
+			reason: out.reason,
+			dtMs: out.dtMs,
+			endUrl: out.endUrl,
+			endCartCount: out.endCartCount,
+			modalText: out.modalText,
+		};
+
+		// Attach resource-timing entries that happened *after* the click (best effort)
+		try {
+			const recent = performance
+				.getEntriesByType("resource")
+				.filter((e) => e.startTime >= perfAtClick - 50) // tiny cushion
+				.map((e) => ({
+					name: String(e.name).slice(0, 220),
+					initiatorType: e.initiatorType,
+					startMs: Math.round(e.startTime),
+					durMs: Math.round(e.duration),
+					transferSize: e.transferSize,
+				}))
+				.filter((e) => rcxIsInterestingUrl(e.name));
+
+			// pick “best candidate” = longest interesting duration after click
+			const best =
+				recent.sort((a, b) => (b.durMs || 0) - (a.durMs || 0))[0] ||
+				null;
+
+			record.net = {
+				sampleCount: recent.length,
+				best,
+				recent: recent.slice(0, 8), // keep short; console stays readable
+			};
+		} catch {}
+
+		rcxCaptureNav("after-click");
+
+		// Attach likely network timings to this attempt (best effort)
+		try {
+			const recent = window.__rcxNet.slice(-30);
+			const best =
+				recent.sort((a, b) => (b.durMs || 0) - (a.durMs || 0))[0] ||
+				null;
+			record.net = { sampleCount: recent.length, best };
+		} catch {}
+
+		// Persist back onto the last attempt
+		window.__rcxAttempts[window.__rcxAttempts.length - 1] = {
+			...window.__rcxAttempts[window.__rcxAttempts.length - 1],
+			net: record.net,
+			outcome: summary,
+		};
+
+		console.log("[rcx] OUTCOME", summary);
+
+		const tag =
+			out.ok === true
+				? "SUCCESS?"
+				: out.ok === false
+					? "FAIL"
+					: "UNKNOWN";
+		$("rcx_s").textContent +=
+			` | ${tag}: ${clampText(out.reason, 60)} | dt ${out.dtMs}ms`;
+	}
+
+	(async () => {
+		$("rcx_s").textContent = "LOCAL clock (no sync)";
+		const target = buildTarget(Date.now());
+		const fireAt = new Date(target.getTime() + CLICK_ADJUST_MS);
+
+		$("rcx_target").textContent = target.toLocaleTimeString();
+		$("rcx_fire").textContent =
+			fireAt.toLocaleTimeString() +
+			(CLICK_ADJUST_MS ? ` (${CLICK_ADJUST_MS}ms)` : "");
+
+		// Arm/highlight when button appears
+		const arm = setInterval(() => {
+			const b = btn();
+			if (b) {
+				highlight(b);
+				$("rcx_s").textContent += " | button armed";
+				clearInterval(arm);
+			}
+		}, 200);
+
+		// Base countdown
+		let baseTimer = setInterval(() => {
+			const now = Date.now();
+			const diff = fireAt - now;
+			const mm = Math.max(0, Math.floor(diff / 60000));
+			const ss = Math.max(0, Math.floor((diff % 60000) / 1000));
+			const cs = Math.max(0, Math.floor((diff % 1000) / 10));
+			$("rcx_t").textContent =
+				`${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
+		}, 200);
+
+		// High precision in last 5 seconds
+		const preDelay = Math.max(0, fireAt - Date.now() - 5000);
+
+		setTimeout(() => {
+			clearInterval(baseTimer);
+
+			(function tick() {
+				const now = Date.now();
+				const diff = fireAt - now;
+
+				if (diff <= 0) {
+					$("rcx_t").textContent = "00:00.00";
+					$("rcx_s").textContent += " | GO";
+
+					const startUrl = location.href;
+					const startCartCount = getCartCount();
+					const fireAtMs = fireAt.getTime();
+
+					const clicked = safeClick();
+					if (clicked)
+						logClickAttempt({ fireAtMs, startUrl, startCartCount });
+
+					return;
+				}
+
+				const mm = Math.floor(diff / 60000);
+				const ss = Math.floor((diff % 60000) / 1000);
+				const cs = Math.floor((diff % 1000) / 10);
+				$("rcx_t").textContent =
+					`${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
+
+				if (mm === 0 && ss <= 5) beep(880, 80, 0.2);
+				requestAnimationFrame(tick);
+			})();
+		}, preDelay);
+	})();
+})();

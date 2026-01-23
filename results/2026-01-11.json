@@ -1,0 +1,361 @@
+[
+{
+  "attempt": {
+    "tsIso": "2026-01-11T15:59:58.044Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -2000,
+    "scheduledFireAtMs": 1768147198000,
+    "actualAtClickMs": 1768147198016,
+    "deltaMs": 16,
+    "serverDateMs": 1768146972000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/709/665",
+    "cartCountBefore": null,
+    "net": {
+      "sampleCount": 0,
+      "best": null
+    },
+    "outcome": {
+      "ok": true,
+      "reason": "URL changed to cart-ish route",
+      "dtMs": 1020,
+      "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+      "endCartCount": null,
+      "modalText": "11 people are viewing this siteHook Up (E/W/S) Campsite #103$75.00Reservation DateSat, 07/11/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy8Max Vehicles2Ch"
+    }
+  },
+  "netRes": null,
+  "netHook": null
+},
+
+[
+  {
+    "name": "https://www.reservecalifornia.com/images/California/Units/tent.NotAvailable.png",
+    "initiatorType": "img",
+    "startMs": 21500,
+    "durMs": 28,
+    "transferSize": 3854
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/Units/bike2.NotAvailable.png",
+    "initiatorType": "img",
+    "startMs": 21500,
+    "durMs": 28,
+    "transferSize": 2880
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44734.jpg",
+    "initiatorType": "img",
+    "startMs": 21532,
+    "durMs": 29,
+    "transferSize": 54053
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44783/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 23817,
+    "durMs": 106,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44783/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 23817,
+    "durMs": 106,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44783.jpg",
+    "initiatorType": "img",
+    "startMs": 23937,
+    "durMs": 30,
+    "transferSize": 65421
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44786/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 25442,
+    "durMs": 102,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44786/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 25442,
+    "durMs": 118,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44786.jpg",
+    "initiatorType": "img",
+    "startMs": 25552,
+    "durMs": 29,
+    "transferSize": 6371
+  },
+  {
+    "name": "https://www.google-analytics.com/g/collect?v=2&tid=G-QTPRX6L8X7&gtm=45je6171v9119792419z89221678628za20gzb9221678628zd9221678628&_p=1768146546937&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=1963029526.1764875526",
+    "initiatorType": "fetch",
+    "startMs": 26368,
+    "durMs": 29,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44787/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 27409,
+    "durMs": 102,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44787/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 27409,
+    "durMs": 102,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44787.jpg",
+    "initiatorType": "img",
+    "startMs": 27519,
+    "durMs": 26,
+    "transferSize": 6371
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44789/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 29226,
+    "durMs": 99,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44789/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 29226,
+    "durMs": 105,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44789.jpg",
+    "initiatorType": "img",
+    "startMs": 29334,
+    "durMs": 28,
+    "transferSize": 59250
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44790/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 32178,
+    "durMs": 104,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44790/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 32178,
+    "durMs": 107,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44790.jpg",
+    "initiatorType": "img",
+    "startMs": 32291,
+    "durMs": 268,
+    "transferSize": 68040
+  },
+  {
+    "name": "https://www.google-analytics.com/g/collect?v=2&tid=G-QTPRX6L8X7&gtm=45je6171v9119792419z89221678628za20gzb9221678628zd9221678628&_p=1768146546937&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=1963029526.1764875526",
+    "initiatorType": "fetch",
+    "startMs": 32400,
+    "durMs": 24,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/48337/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 37736,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/48337/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 37736,
+    "durMs": 102,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/48337.jpg",
+    "initiatorType": "img",
+    "startMs": 37845,
+    "durMs": 27,
+    "transferSize": 10712
+  },
+  {
+    "name": "https://www.google-analytics.com/g/collect?v=2&tid=G-QTPRX6L8X7&gtm=45je6171v9119792419z89221678628za20gzb9221678628zd9221678628&_p=1768146546937&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=1963029526.1764875526",
+    "initiatorType": "fetch",
+    "startMs": 42728,
+    "durMs": 34,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44783/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 43583,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44783/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 43583,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44783.jpg",
+    "initiatorType": "img",
+    "startMs": 43694,
+    "durMs": 30,
+    "transferSize": 65421
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44786/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 45986,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44786/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 45986,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44786.jpg",
+    "initiatorType": "img",
+    "startMs": 46096,
+    "durMs": 29,
+    "transferSize": 6371
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44787/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 47943,
+    "durMs": 104,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44787/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 47944,
+    "durMs": 105,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44787.jpg",
+    "initiatorType": "img",
+    "startMs": 48056,
+    "durMs": 29,
+    "transferSize": 6371
+  },
+  {
+    "name": "https://www.google-analytics.com/g/collect?v=2&tid=G-QTPRX6L8X7&gtm=45je6171v9119792419z89221678628za20gzb9221678628zd9221678628&_p=1768146546937&gcd=13l3l3l3l1l1&npa=0&dma=0&cid=1963029526.1764875526",
+    "initiatorType": "fetch",
+    "startMs": 48572,
+    "durMs": 23,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44789/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 49065,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44789/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 49065,
+    "durMs": 162,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44789.jpg",
+    "initiatorType": "img",
+    "startMs": 49174,
+    "durMs": 28,
+    "transferSize": 59250
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/search/details/44786/startdate/2026-07-11/nights/7/0/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 50259,
+    "durMs": 95,
+    "transferSize": 0
+  },
+  {
+    "name": "https://california-rdr.prod.cali.rd12.recreation-management.tylerapp.com/rdr/fd/availability/getbyunit/44786/startdate/2026-07-11/nights/7/true/1",
+    "initiatorType": "xmlhttprequest",
+    "startMs": 50259,
+    "durMs": 101,
+    "transferSize": 0
+  },
+  {
+    "name": "https://www.reservecalifornia.com/images/California/ParkImages/Units/44786.jpg",
+    "initiatorType": "img",
+    "startMs": 50361,
+    "durMs": 24,
+    "transferSize": 6371
+  }
+],
+
+{
+  "name": "https://www.reservecalifornia.com/",
+  "entryType": "navigation",
+  "startTime": 0,
+  "duration": 252.3999999910593,
+  "initiatorType": "navigation",
+  "deliveryType": "",
+  "nextHopProtocol": "h2",
+  "renderBlockingStatus": "non-blocking",
+  "contentEncoding": "",
+  "workerStart": 0,
+  "workerRouterEvaluationStart": 0,
+  "workerCacheLookupStart": 0,
+  "workerMatchedSourceType": "",
+  "workerFinalSourceType": "",
+  "redirectStart": 0,
+  "redirectEnd": 0,
+  "fetchStart": 3.7999999970197678,
+  "domainLookupStart": 3.7999999970197678,
+  "domainLookupEnd": 3.7999999970197678,
+  "connectStart": 3.7999999970197678,
+  "secureConnectionStart": 3.7999999970197678,
+  "connectEnd": 3.7999999970197678,
+  "requestStart": 5.5,
+  "responseStart": 27.5,
+  "firstInterimResponseStart": 0,
+  "finalResponseHeadersStart": 27.5,
+  "responseEnd": 28,
+  "transferSize": 1938,
+  "encodedBodySize": 1638,
+  "decodedBodySize": 1638,
+  "responseStatus": 200,
+  "serverTiming": [],
+  "unloadEventStart": 31.200000002980232,
+  "unloadEventEnd": 31.200000002980232,
+  "domInteractive": 162.79999999701977,
+  "domContentLoadedEventStart": 176.20000000298023,
+  "domContentLoadedEventEnd": 176.20000000298023,
+  "domComplete": 252.3999999910593,
+  "loadEventStart": 252.3999999910593,
+  "loadEventEnd": 252.3999999910593,
+  "type": "reload",
+  "redirectCount": 0,
+  "activationStart": 0,
+  "criticalCHRestart": 0,
+  "notRestoredReasons": null
+}
+
+]

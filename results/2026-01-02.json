@@ -1,0 +1,53 @@
+// before outcome:
+{
+    "tsIso": "2026-01-02T15:59:58.603Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1440,
+    "scheduledFireAtMs": 1767369598560,
+    "actualAtClickMs": 1767369598575,
+    "deltaMs": 15,
+    "serverDateMs": 1767369528000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/720/712",
+    "cartCountBefore": null
+}
+
+// outcome:
+{
+    "ok": true,
+    "reason": "URL changed to cart-ish route",
+    "dtMs": 1107,
+    "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+    "endCartCount": null,
+    "modalText": "16 people are viewing this sitePremium Campsite #180$70.00Reservation DateThu, 07/02/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy8Max Vehicles3Check-In S"
+}
+
+// from combined result:
+{
+    "tsIso": "2026-01-02T15:59:58.603Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1440,
+    "scheduledFireAtMs": 1767369598560,
+    "actualAtClickMs": 1767369598575,
+    "deltaMs": 15,
+    "serverDateMs": 1767369528000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/720/712",
+    "cartCountBefore": null,
+    "outcome": {
+        "ok": true,
+        "reason": "URL changed to cart-ish route",
+        "dtMs": 1107,
+        "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+        "endCartCount": null,
+        "modalText": "16 people are viewing this sitePremium Campsite #180$70.00Reservation DateThu, 07/02/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy8Max Vehicles3Check-In S"
+    }
+}
+
+/* ================== */
+
+// Date sanity check results
+(async () => {
+  const r = await fetch(`${location.origin}/favicon.ico?rcx=${Date.now()}`, { cache: "no-store", credentials: "same-origin" });
+  console.log("status", r.status, "date", r.headers.get("date"));
+})();
+Promise {<pending>}[[Prototype]]: Promise[[PromiseState]]: "fulfilled"[[PromiseResult]]: undefined
+VM25838:3 status 200 date Fri, 02 Jan 2026 16:08:49 GMT

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>RC Helper Options</title>
+    <style>
+      body { font: 14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; max-width: 720px; }
+      input[type="text"] { width: 100%; padding: 8px; }
+      label { display: block; margin-top: 16px; }
+      .hint { color: #555; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <h2>ReserveCalifornia Book-Now Helper</h2>
+    <label>
+      Target text (optional):
+      <input id="targetText" type="text" placeholder="e.g. Carpinteria SB – Hook Up (E/W) #M420">
+      <div class="hint">We’ll prefer a Book Now button inside a card containing this text.</div>
+    </label>
+
+    <label>
+      Schedule (optional, HH:MM:SS.mmm):
+      <input id="schedule" type="text" placeholder="07:59:59.800">
+      <div class="hint">One-shot click at today’s time. Leave blank to disable.</div>
+    </label>
+
+    <label>
+      <input id="enabled" type="checkbox"> Enabled
+    </label>
+
+    <p><button id="save">Save</button> <span id="status"></span></p>
+
+    <script src="options.js"></script>
+  </body>
+</html>
