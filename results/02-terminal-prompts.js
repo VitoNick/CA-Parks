@@ -9,35 +9,7 @@ copy(JSON.stringify(window.__rcxAttempts.at(-1), null, 2));
 // Reserve Unit button (note: id is misspelled on the site: "sumbit")
 copy(document.getElementById('precart_sumbit_btn'));
 
-// If it sometimes returns null, it's usually because React hasn't rendered yet.
-// Run this to wait up to 10s:
-async function waitForElement(selector, timeoutMs = 10000) {
-  const started = performance.now();
-  const existing = document.querySelector(selector);
-  if (existing) return existing;
 
-  return await new Promise((resolve, reject) => {
-    const timer = setInterval(() => {
-      const el = document.querySelector(selector);
-      if (el) {
-        clearInterval(timer);
-        resolve(el);
-        return;
-      }
-      if (performance.now() - started > timeoutMs) {
-        clearInterval(timer);
-        reject(new Error(`Timeout waiting for ${selector}`));
-      }
-    }, 50);
-  });
-}
-
-// Wait + copy
-// copy(await waitForElement('#precart_sumbit_btn'));
-
-// Sanity checks: execution context / iframes
-// window === window.top
-// document.querySelectorAll('iframe').length
 
 // Before refreshing to see data logged:
 

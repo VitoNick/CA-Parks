@@ -13,7 +13,7 @@
     TARGET_S = 0,
     TARGET_MS = 0; // target time local
   // Primary click target selector for the current page.
-  // If not found at click time, we fall back to a best-effort "Reserve Unit" button finder.
+  // (No fallback here — the Reserve Unit button is only used for outcome detection.)
   const BUTTON_SEL = "#checkout-button";
   const DRY_RUN = false;
   const BEEP = true;
@@ -77,6 +77,34 @@
     }
   }
 
+  // Timestamp helpers
+  function rcxNowStamp() {
+    const d = new Date();
+    const tzOffsetMin = -d.getTimezoneOffset(); // e.g. -480 for PST, -420 for PDT
+    let tzName = null;
+    try {
+      tzName = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+    } catch {}
+    return {
+      tsIso: d.toISOString(),
+      tsLocal: d.toLocaleString(),
+      tzOffsetMin,
+      tzName,
+    };
+  }
+
+  function rcxStampFromMs(ms) {
+    try {
+      const d = new Date(ms);
+      return {
+        iso: d.toISOString(),
+        local: d.toLocaleString(),
+      };
+    } catch {
+      return { iso: null, local: null };
+    }
+  }
+
   // Hook fetch
   (() => {
     const _fetch = window.fetch;
@@ -97,9 +125,10 @@
         const t1 = performance.now();
 
         if (interesting) {
+          const stamp = rcxNowStamp();
           const entry = {
             kind: "fetch",
-            tsIso: new Date().toISOString(),
+            ...stamp,
             url: rcxTrimUrl(url),
             status: res.status,
             durMs: Math.round(t1 - t0),
@@ -111,9 +140,10 @@
       } catch (err) {
         const t1 = performance.now();
         if (interesting) {
+          const stamp = rcxNowStamp();
           const entry = {
             kind: "fetch",
-            tsIso: new Date().toISOString(),
+            ...stamp,
             url: rcxTrimUrl(url),
             status: null,
             error: String(err && err.message ? err.message : err),
@@ -149,9 +179,10 @@
       const done = () => {
         const t1 = performance.now();
         if (!interesting) return;
+        const stamp = rcxNowStamp();
         const entry = {
           kind: "xhr",
-          tsIso: new Date().toISOString(),
+          ...stamp,
           method: meta.method,
           url: rcxTrimUrl(meta.url),
           status:
@@ -179,9 +210,11 @@
       const ok = orig.call(this, url, data);
       const t1 = performance.now();
 
+      const stamp = rcxNowStamp();
+
       const entry = {
         kind: "beacon",
-        tsIso: new Date().toISOString(),
+        ...stamp,
         url: String(url).slice(0, 220),
         ok,
         durMs: Math.round(t1 - t0),
@@ -496,6 +529,10 @@
     const perfAtClick = performance.now();
     const deltaMs = actualMs - fireAtMs; // +late, -early
 
+    const stamp = rcxNowStamp();
+    const scheduledFmt = rcxStampFromMs(fireAtMs);
+    const actualFmt = rcxStampFromMs(actualMs);
+
     // Optional: server Date header at click time (best-effort)
     let serverDateMs = null;
     if (SERVER_PROBE_URL) {
@@ -510,16 +547,26 @@
     }
 
     const record = {
-      tsIso: new Date().toISOString(),
+      ...stamp,
       clockSource: "LOCAL",
       clickAdjustMs: CLICK_ADJUST_MS,
       scheduledFireAtMs: fireAtMs,
+      scheduledFireAtIso: scheduledFmt.iso,
+      scheduledFireAtLocal: scheduledFmt.local,
       actualAtClickMs: actualMs,
+      actualAtClickIso: actualFmt.iso,
+      actualAtClickLocal: actualFmt.local,
       deltaMs: Math.round(deltaMs),
       serverDateMs,
       urlAtClick: startUrl,
       cartCountBefore: startCartCount,
     };
+
+    if (serverDateMs != null) {
+      const serverFmt = rcxStampFromMs(serverDateMs);
+      record.serverDateIso = serverFmt.iso;
+      record.serverDateLocal = serverFmt.local;
+    }
 
     window.__rcxAttempts.push(record);
     console.log("[rcx] CLICK TIMING", record);

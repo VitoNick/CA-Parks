@@ -167,5 +167,86 @@ null,
 },
 {
   "html": "<button type=\"submit\" id=\"precart_sumbit_btn\" class=\"btn btn-teal\">Reserve Unit</button>"
+},
+
+
+{
+  "tsIso": "2026-01-30T01:27:58.932Z",
+  "clockSource": "LOCAL",
+  "clickAdjustMs": -1150,
+  "scheduledFireAtMs": 1769736478850,
+  "actualAtClickMs": 1769736478869,
+  "deltaMs": 19,
+  "serverDateMs": 1769736401000,
+  "urlAtClick": "https://www.reservecalifornia.com/park/694/624",
+  "cartCountBefore": null,
+  "netHook": {
+    "sampleCount": 6,
+    "best": {
+      "kind": "xhr",
+      "tsIso": "2026-01-30T01:27:59.757Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/load/precartdataforbookingmodify",
+      "status": 200,
+      "durMs": 394
+    },
+    "recent": [
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-30T01:27:59.757Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/load/precartdataforbookingmodify",
+        "status": 200,
+        "durMs": 394
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-30T01:27:59.104Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 220
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-30T01:27:59.076Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 192
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-30T01:27:59.287Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+        "status": 200,
+        "durMs": 183
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-30T01:27:59.247Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+        "status": 200,
+        "durMs": 171
+      },
+      {
+        "kind": "fetch",
+        "tsIso": "2026-01-30T01:27:48.936Z",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 0,
+        "durMs": 84
+      }
+    ]
+  },
+  "outcome": {
+    "ok": true,
+    "reason": "Reserve Unit button present",
+    "dtMs": 3317,
+    "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+    "endCartCount": null,
+    "modalText": "Policy Change Effective 7126From : 12/31/2025 To : 12/31/2026Alert Type : CampingPolicy Change Effective July 1, 2026 Reservations for camping and lodging with arrival dates on or after July 1, 2026, are subject to new policies. The reserva"
+  }
 }
 ]
