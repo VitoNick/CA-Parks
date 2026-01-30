@@ -1,0 +1,57 @@
+[
+  {
+    "tsIso": "2026-01-27T15:59:58.740Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1300,
+    "scheduledFireAtMs": 1769529598700,
+    "actualAtClickMs": 1769529598716,
+    "deltaMs": 16,
+    "serverDateMs": 1769529542000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/709/666",
+    "cartCountBefore": null,
+    "netHook": {
+      "sampleCount": 3,
+      "best": {
+        "kind": "xhr",
+        "tsIso": "2026-01-27T15:59:58.891Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 162
+      },
+      "recent": [
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-27T15:59:58.891Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 162
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-27T15:59:58.869Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 140
+        },
+        {
+          "kind": "fetch",
+          "tsIso": "2026-01-27T15:59:48.793Z",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 0,
+          "durMs": 91
+        }
+      ]
+    },
+    "outcome": {
+      "ok": true,
+      "reason": "URL changed to cart-ish route",
+      "dtMs": 256,
+      "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+      "endCartCount": null,
+      "modalText": "16 people are viewing this sitePremium Campsite #165$70.00Reservation DateMon, 07/27/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy8Max Vehicles3Check-In S"
+    }
+  }
+]

@@ -1,0 +1,105 @@
+[
+  {
+    "tsIso": "2026-01-26T15:59:58.853Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1200,
+    "scheduledFireAtMs": 1769443198800,
+    "actualAtClickMs": 1769443198818,
+    "deltaMs": 18,
+    "serverDateMs": 1769443113000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/709/670",
+    "cartCountBefore": null,
+    "netHook": {
+      "sampleCount": 3,
+      "best": {
+        "kind": "xhr",
+        "tsIso": "2026-01-26T15:59:59.053Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 224
+      },
+      "recent": [
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-26T15:59:59.053Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 224
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-26T15:59:58.980Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 151
+        },
+        {
+          "kind": "fetch",
+          "tsIso": "2026-01-26T15:59:48.893Z",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 0,
+          "durMs": 92
+        }
+      ]
+    },
+    "outcome": {
+      "ok": true,
+      "reason": "URL changed to cart-ish route",
+      "dtMs": 753,
+      "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+      "endCartCount": null,
+      "modalText": "18 people are viewing this sitePremium Campsite #060$70.00Reservation DateSun, 07/26/2026Reservation duration1 Night2 Nights3 Nights4 Nights5 Nights6 Nights7 NightsBook Now×Unit DetailsShow MoreShow LessMax Occupancy8Max Vehicles3Check-In S"
+    }
+  },
+
+  [
+    "The unit is not available for the date(s) specified."
+  ],
+
+  {
+    "alertMessage": "The unit is not available for the date(s) specified.",
+    "bodyHasModalOpen": true,
+    "modalVisible": false,
+    "allModalText": [
+      "The unit is not available for the date(s) specified.",
+      "The unit is not available for the date(s) specified."
+    ]
+  },
+
+  {
+    "bodyClasses": "park-theme-body California modal-open",
+    "modalOpen": true,
+    "alertMessageElement": {
+      "exists": true,
+      "visible": true,
+      "text": "The unit is not available for the date(s) specified."
+    },
+    "allModals": [
+      {
+        "index": 0,
+        "tagName": "DIV",
+        "id": "",
+        "className": "fade allmessageModal loginFailpopup modal show",
+        "visible": false,
+        "text": "MessageThe unit is not available for the date(s) specified.Close"
+      },
+      {
+        "index": 1,
+        "tagName": "DIV",
+        "id": "alertModal",
+        "className": "modal-dialog modal-dialog-centered",
+        "visible": true,
+        "text": "MessageThe unit is not available for the date(s) specified.Close"
+      }
+    ],
+    "getModalTextResult": {
+      "method": "#alertModalMessage",
+      "text": "The unit is not available for the date(s) specified."
+    },
+    "timestamp": "2026-01-26T18:39:49.475Z"
+  }
+  
+]

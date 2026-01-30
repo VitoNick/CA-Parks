@@ -1,14 +1,68 @@
 // To sync system time on macOS, run in Terminal:
-sntp: -sS TimeRanges.apple.com
+// sntp -sS TimeRanges.apple.com
 
+
+// Full attempt data to clipboard (includes netHook, outcome, error details)
+copy(JSON.stringify((window.__rcxAttempts && window.__rcxAttempts.slice(-1)[0]) || null, null, 2));
+copy(JSON.stringify(window.__rcxAttempts.at(-1), null, 2));
+
+// Reserve Unit button (note: id is misspelled on the site: "sumbit")
+copy(document.getElementById('precart_sumbit_btn'));
+
+// If it sometimes returns null, it's usually because React hasn't rendered yet.
+// Run this to wait up to 10s:
+async function waitForElement(selector, timeoutMs = 10000) {
+  const started = performance.now();
+  const existing = document.querySelector(selector);
+  if (existing) return existing;
+
+  return await new Promise((resolve, reject) => {
+    const timer = setInterval(() => {
+      const el = document.querySelector(selector);
+      if (el) {
+        clearInterval(timer);
+        resolve(el);
+        return;
+      }
+      if (performance.now() - started > timeoutMs) {
+        clearInterval(timer);
+        reject(new Error(`Timeout waiting for ${selector}`));
+      }
+    }, 50);
+  });
+}
+
+// Wait + copy
+// copy(await waitForElement('#precart_sumbit_btn'));
+
+// Sanity checks: execution context / iframes
+// window === window.top
+// document.querySelectorAll('iframe').length
 
 // Before refreshing to see data logged:
 
 // Prints to terminal
 console.log(JSON.stringify(window.__rcxAttempts.at(-1), null, 2));
 
-// Copies to clipboard
-copy(JSON.stringify(window.__rcxAttempts.at(-1), null, 2));
+
+// ============================================================
+// Jan 26 modal tests
+// ============================================================
+
+// Quick modal check (when modal is visible)
+document.getElementById('alertModalMessage')?.textContent
+
+// Modal debug to clipboard
+copy(JSON.stringify({
+  alertMessage: document.getElementById('alertModalMessage')?.textContent || null,
+  bodyHasModalOpen: document.body.classList.contains('modal-open'),
+  modalVisible: document.querySelector('#alertModal, [role="dialog"]')?.offsetParent !== null,
+  allModalText: [...document.querySelectorAll('.modal-body, #alertModalMessage')].map(el => el.textContent)
+}, null, 2));
+
+// ============================================================
+// End Jan 26 modal tests
+// ============================================================
 
 // Full fetch log to terminal
 (async () => {
@@ -21,7 +75,7 @@ copy(JSON.stringify(window.__rcxAttempts.at(-1), null, 2));
 // Network hooking attempt log to terminal
 // ============================================================
 
-
+// OLD STUFF ======================================
 // Full fetch log to clipboard
 copy(JSON.stringify({
   attempt: window.__rcxAttempts.at(-1),
@@ -50,3 +104,28 @@ copy(JSON.stringify(
   null,
   2
 ));
+// OLD STUFF END ======================================
+
+// ============================================================
+// Network hooking attempt log - COPY THIS ONE ONLY
+// ============================================================
+
+
+
+
+// ============================================================
+// DEBUG: Post-test modal/network analysis (copy to JSON file)
+// ============================================================
+
+// Comprehensive debug data - copy all to JSON file
+copy(JSON.stringify({
+  modal: {
+    visible: document.querySelector('.modal, [role="dialog"]') !== null,
+    bodyClasses: document.body.className,
+    modals: [...document.querySelectorAll('.modal, [role="dialog"], .modal-content, .modal-body')]
+      .map((m, i) => ({ index: i, text: m.textContent.slice(0, 200) }))
+  },
+  url: location.href,
+  netHook: window.__rcxNet.slice(-10),
+  attempt: window.__rcxAttempts.at(-1)
+}, null, 2));

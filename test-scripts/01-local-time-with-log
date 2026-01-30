@@ -8,20 +8,22 @@
 *************************************************************************/
 (() => {
   /* ===== CONFIG ===== */
-  const TARGET_H = 8,
-    TARGET_M = 0,
+  const TARGET_H = 17,
+    TARGET_M = 28,
     TARGET_S = 0,
     TARGET_MS = 0; // target time local
+  // Primary click target selector for the current page.
+  // If not found at click time, we fall back to a best-effort "Reserve Unit" button finder.
   const BUTTON_SEL = "#checkout-button";
   const DRY_RUN = false;
   const BEEP = true;
 
   // Manual timing adjustment
   // negative = earlier, positive = later
-  const CLICK_ADJUST_MS = -1000; // you’re testing -1000, -1500, etc.
+  const CLICK_ADJUST_MS = -1150; // you’re testing -1000, -1500, etc.
 
   // Outcome detection window after click
-  const OUTCOME_TIMEOUT_MS = 5000;
+  const OUTCOME_TIMEOUT_MS = 10000;  // Increased for peak traffic congestion
 
   // Optional: if you know cart count selector, put it here (else heuristic)
   const CART_COUNT_SEL = null;
@@ -230,7 +232,20 @@
 
   // Button helpers
   function btn() {
+    // IMPORTANT: this is the fire-time click target.
+    // Do not fall back to other buttons here (Reserve Unit is used only for outcome detection).
     return document.querySelector(BUTTON_SEL);
+  }
+
+  function findReserveUnitButton() {
+    return (
+      document.getElementById("precart_submit_btn") ||
+      document.getElementById("precart_sumbit_btn") ||
+      [...document.querySelectorAll('button[type="submit"], button')].find(
+        (b) => /\breserve\s+unit\b/i.test((b && b.textContent) || "")
+      ) ||
+      null
+    );
   }
   function highlight(el) {
     if (!el) return;
@@ -267,11 +282,30 @@
   // Best-effort modal/error message
   function getModalText() {
     try {
-      const modals = [
-        ...document.querySelectorAll(
-          '[role="dialog"], .modal, .modal-dialog'
-        ),
-      ].filter((el) => el && el.offsetParent !== null);
+      // First try the specific alert message element (most reliable)
+      const alertMsg = document.getElementById('alertModalMessage');
+      if (alertMsg && alertMsg.textContent) {
+        const t = clampText(alertMsg.textContent, 240);
+        if (t) return t;
+      }
+
+      // Fallback: Prioritize modal-body over full modal to get actual error message
+      const bodySelectors = '.modal-body, [class*="modal"] .body, [role="dialog"] p';
+      const modalSelectors = '[role="dialog"], .modal-dialog, .modal-content, .modal';
+      
+      // Try body/content first (more specific)
+      let candidates = [...document.querySelectorAll(bodySelectors)];
+      if (candidates.length === 0) {
+        // Fallback to full modal containers
+        candidates = [...document.querySelectorAll(modalSelectors)];
+      }
+      
+      const modals = candidates.filter((el) => {
+        if (!el) return false;
+        if (el.offsetParent !== null) return true;
+        if (document.body.classList.contains('modal-open')) return true;
+        return false;
+      });
 
       for (const m of modals) {
         const t = clampText(m.textContent, 240);
@@ -316,28 +350,49 @@
             urlNow
           )
         ) {
-          // Check if modal appeared even though URL changed
-          const mt = getModalText();
-          const hasErrorModal = mt && /not available|not permitted|restriction|choose a new stay|not allowed|unable/i.test(mt);
-          
-          if (hasErrorModal) {
-            // Navigation happened but with error modal - treat as error
-            const isTooEarly = /arrival date booking restriction|last allowed arrival date|not permitted according to|restriction list/i.test(mt);
-            const isSoldOut = /no longer available|not available|already reserved|in another.*cart/i.test(mt);
+          // Wait briefly for modals to render before deciding success/failure
+          // Modals often appear 300-500ms after URL change
+          setTimeout(() => {
+            if (done) return; // Already finished by another check
             
-            const errorType = isTooEarly ? "too-early" : isSoldOut ? "sold-out" : "unknown";
+            // Check for Reserve Unit button FIRST - most reliable success indicator
+            const reserveBtn = findReserveUnitButton();
             
-            finish({
-              ok: false,
-              reason: `Cart route with error: ${errorType}`,
-              errorDetail: clampText(mt, 150)
-            });
-          } else {
-            finish({
-              ok: true,
-              reason: "URL changed to cart-ish route",
-            });
-          }
+            if (reserveBtn) {
+              // Button present = successful reservation (even if policy modal showing)
+              finish({
+                ok: true,
+                reason: "Reserve Unit button present",
+              });
+              return;
+            }
+            
+            // No button - check if error modal explains why
+            const mt = getModalText();
+            const hasErrorModal = mt && /not available|not permitted|restriction|choose a new stay|not allowed|unable|policy change|last allowed arrival date|booking restriction/i.test(mt);
+            
+            if (hasErrorModal) {
+              // Navigation happened but with error modal - classify error type
+              // Check critical errors first (restriction/sold-out), then policy change
+              const isTooEarly = /arrival date booking restriction|last allowed arrival date|not permitted according to|restriction list/i.test(mt);
+              const isSoldOut = /no longer available|not available|already reserved|in another.*cart/i.test(mt);
+              const isPolicyChange = /policy change effective|alert type.*camping/i.test(mt);
+              
+              const errorType = isTooEarly ? "too-early" : isSoldOut ? "sold-out" : isPolicyChange ? "policy-change" : "unknown";
+              
+              finish({
+                ok: false,
+                reason: `Cart route with error: ${errorType}`,
+                errorDetail: clampText(mt, 150)
+              });
+            } else {
+              // No button, no error modal - ambiguous
+              finish({
+                ok: true,
+                reason: "URL changed to cart-ish route",
+              });
+            }
+          }, 3000); // Wait 3s for modal rendering - plenty fast for user review
           return;
         }
 
@@ -359,15 +414,16 @@
         const mt = getModalText();
         if (
           mt &&
-          /not available|not permitted|restriction|choose a new stay|not allowed|unable/i.test(
+          /not available|not permitted|restriction|choose a new stay|not allowed|unable|policy change|last allowed arrival date|booking restriction/i.test(
             mt
           )
         ) {
-          // Distinguish error types
+          // Distinguish error types - check critical errors first (restriction/sold-out), then policy
           const isTooEarly = /arrival date booking restriction|last allowed arrival date|not permitted according to|restriction list/i.test(mt);
           const isSoldOut = /no longer available|not available|already reserved|in another.*cart/i.test(mt);
+          const isPolicyChange = /policy change effective|alert type.*camping/i.test(mt);
           
-          const errorType = isTooEarly ? "too-early" : isSoldOut ? "sold-out" : "unknown";
+          const errorType = isTooEarly ? "too-early" : isSoldOut ? "sold-out" : isPolicyChange ? "policy-change" : "unknown";
           
           finish({ 
             ok: false, 

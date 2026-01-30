@@ -1,0 +1,212 @@
+[
+{
+  "tsIso": "2026-01-25T15:59:58.912Z",
+  "clockSource": "LOCAL",
+  "clickAdjustMs": -1200,
+  "scheduledFireAtMs": 1769356798800,
+  "actualAtClickMs": 1769356798822,
+  "deltaMs": 22,
+  "serverDateMs": 1769356598000,
+  "urlAtClick": "https://www.reservecalifornia.com/park/709/665",
+  "cartCountBefore": null,
+  "netHook": {
+    "sampleCount": 5,
+    "best": {
+      "kind": "xhr",
+      "tsIso": "2026-01-25T16:00:00.932Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+      "status": 200,
+      "durMs": 1838
+    },
+    "recent": [
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-25T16:00:00.932Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+        "status": 200,
+        "durMs": 1838
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-25T16:00:00.328Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+        "status": 200,
+        "durMs": 1203
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-25T15:59:59.126Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 287
+      },
+      {
+        "kind": "xhr",
+        "tsIso": "2026-01-25T15:59:59.094Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 200,
+        "durMs": 256
+      },
+      {
+        "kind": "fetch",
+        "tsIso": "2026-01-25T15:59:48.979Z",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+        "status": 0,
+        "durMs": 177
+      }
+    ]
+  },
+  "outcome": {
+    "ok": null,
+    "reason": "No clear signal (timeout)",
+    "dtMs": 5103,
+    "endUrl": "https://www.reservecalifornia.com/park/709/665",
+    "endCartCount": null,
+    "modalText": "California State Parks - California State Parks Reservation System Click to move to headerClick to move to park infoClick to move to searchClick to move to unitsClick to move to additional park infoClose IconAccessibilityCamping and Lodging"
+  }
+},
+
+{
+  "modal": {
+    "visible": true,
+    "bodyClasses": "park-theme-body California modal-open",
+    "modals": [
+      {
+        "index": 0,
+        "text": "InformationThe unit is not available for the date(s) specified.Close"
+      },
+      {
+        "index": 1,
+        "text": "InformationThe unit is not available for the date(s) specified.Close"
+      },
+      {
+        "index": 2,
+        "text": "InformationThe unit is not available for the date(s) specified.Close"
+      },
+      {
+        "index": 3,
+        "text": "The unit is not available for the date(s) specified."
+      }
+    ]
+  },
+  "url": "https://www.reservecalifornia.com/park/709/665",
+  "netHook": [
+    {
+      "kind": "fetch",
+      "tsIso": "2026-01-25T15:59:48.979Z",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+      "status": 0,
+      "durMs": 177
+    },
+    {
+      "kind": "xhr",
+      "tsIso": "2026-01-25T15:59:59.094Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+      "status": 200,
+      "durMs": 256
+    },
+    {
+      "kind": "xhr",
+      "tsIso": "2026-01-25T15:59:59.126Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+      "status": 200,
+      "durMs": 287
+    },
+    {
+      "kind": "xhr",
+      "tsIso": "2026-01-25T16:00:00.328Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+      "status": 200,
+      "durMs": 1203
+    },
+    {
+      "kind": "xhr",
+      "tsIso": "2026-01-25T16:00:00.932Z",
+      "method": "POST",
+      "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+      "status": 200,
+      "durMs": 1838
+    }
+  ],
+  "attempt": {
+    "tsIso": "2026-01-25T15:59:58.912Z",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1200,
+    "scheduledFireAtMs": 1769356798800,
+    "actualAtClickMs": 1769356798822,
+    "deltaMs": 22,
+    "serverDateMs": 1769356598000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/709/665",
+    "cartCountBefore": null,
+    "netHook": {
+      "sampleCount": 5,
+      "best": {
+        "kind": "xhr",
+        "tsIso": "2026-01-25T16:00:00.932Z",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+        "status": 200,
+        "durMs": 1838
+      },
+      "recent": [
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-25T16:00:00.932Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+          "status": 200,
+          "durMs": 1838
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-25T16:00:00.328Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+          "status": 200,
+          "durMs": 1203
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-25T15:59:59.126Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 287
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-25T15:59:59.094Z",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 256
+        },
+        {
+          "kind": "fetch",
+          "tsIso": "2026-01-25T15:59:48.979Z",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 0,
+          "durMs": 177
+        }
+      ]
+    },
+    "outcome": {
+      "ok": null,
+      "reason": "No clear signal (timeout)",
+      "dtMs": 5103,
+      "endUrl": "https://www.reservecalifornia.com/park/709/665",
+      "endCartCount": null,
+      "modalText": "California State Parks - California State Parks Reservation System Click to move to headerClick to move to park infoClick to move to searchClick to move to unitsClick to move to additional park infoClose IconAccessibilityCamping and Lodging"
+    }
+  }
+}
+
+]
