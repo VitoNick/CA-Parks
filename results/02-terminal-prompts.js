@@ -3,12 +3,14 @@
 
 
 // Full attempt data to clipboard (includes netHook, outcome, error details)
+// If you want null captured
 copy(JSON.stringify((window.__rcxAttempts && window.__rcxAttempts.slice(-1)[0]) || null, null, 2));
+// If you want cleaner results without null
 copy(JSON.stringify(window.__rcxAttempts.at(-1), null, 2));
+
 
 // Reserve Unit button (note: id is misspelled on the site: "sumbit")
 copy(document.getElementById('precart_sumbit_btn'));
-
 
 
 // Before refreshing to see data logged:

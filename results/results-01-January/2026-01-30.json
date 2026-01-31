@@ -1,0 +1,113 @@
+[
+  {
+    "tsIso": "2026-01-30T15:59:58.975Z",
+    "tsLocal": "1/30/2026, 7:59:58 AM",
+    "tzOffsetMin": -480,
+    "tzName": "America/Los_Angeles",
+    "clockSource": "LOCAL",
+    "clickAdjustMs": -1050,
+    "scheduledFireAtMs": 1769788798950,
+    "scheduledFireAtIso": "2026-01-30T15:59:58.950Z",
+    "scheduledFireAtLocal": "1/30/2026, 7:59:58 AM",
+    "actualAtClickMs": 1769788798975,
+    "actualAtClickIso": "2026-01-30T15:59:58.975Z",
+    "actualAtClickLocal": "1/30/2026, 7:59:58 AM",
+    "deltaMs": 25,
+    "serverDateMs": 1769788796000,
+    "urlAtClick": "https://www.reservecalifornia.com/park/709/670",
+    "cartCountBefore": null,
+    "serverDateIso": "2026-01-30T15:59:56.000Z",
+    "serverDateLocal": "1/30/2026, 7:59:56 AM",
+    "netHook": {
+      "sampleCount": 6,
+      "best": {
+        "kind": "xhr",
+        "tsIso": "2026-01-30T15:59:59.731Z",
+        "tsLocal": "1/30/2026, 7:59:59 AM",
+        "tzOffsetMin": -480,
+        "tzName": "America/Los_Angeles",
+        "method": "POST",
+        "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/load/precartdataforbookingmodify",
+        "status": 200,
+        "durMs": 317
+      },
+      "recent": [
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-30T15:59:59.731Z",
+          "tsLocal": "1/30/2026, 7:59:59 AM",
+          "tzOffsetMin": -480,
+          "tzName": "America/Los_Angeles",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/load/precartdataforbookingmodify",
+          "status": 200,
+          "durMs": 317
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-30T15:59:59.218Z",
+          "tsLocal": "1/30/2026, 7:59:59 AM",
+          "tzOffsetMin": -480,
+          "tzName": "America/Los_Angeles",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 228
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-30T15:59:59.172Z",
+          "tsLocal": "1/30/2026, 7:59:59 AM",
+          "tzOffsetMin": -480,
+          "tzName": "America/Los_Angeles",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 200,
+          "durMs": 182
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-30T15:59:59.387Z",
+          "tsLocal": "1/30/2026, 7:59:59 AM",
+          "tzOffsetMin": -480,
+          "tzName": "America/Los_Angeles",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+          "status": 200,
+          "durMs": 169
+        },
+        {
+          "kind": "xhr",
+          "tsIso": "2026-01-30T15:59:59.304Z",
+          "tsLocal": "1/30/2026, 7:59:59 AM",
+          "tzOffsetMin": -480,
+          "tzName": "America/Los_Angeles",
+          "method": "POST",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionandlockforbooking",
+          "status": 200,
+          "durMs": 133
+        },
+        {
+          "kind": "fetch",
+          "tsIso": "2026-01-30T15:59:49.078Z",
+          "tsLocal": "1/30/2026, 7:59:49 AM",
+          "tzOffsetMin": -480,
+          "tzName": "America/Los_Angeles",
+          "url": "https://rdapi.reservecalifornia.com/api/webaccessfacility/check/restractionsforbooking",
+          "status": 0,
+          "durMs": 125
+        }
+      ]
+    },
+    "outcome": {
+      "ok": false,
+      "reason": "Cart route with error: too-early",
+      "dtMs": 3262,
+      "endUrl": "https://www.reservecalifornia.com/Facilities/SelectReservationPreCart",
+      "endCartCount": null,
+      "modalText": "Your selection was not permitted according to the restriction list below:Arrival Date Booking RestrictionThu, Jul 30, 2026 Last Allowed Arrival Date: '07/29/2026'Restrictions may vary by campground, season, or day of week.Please refer to th"
+    }
+  }
+
+
+]

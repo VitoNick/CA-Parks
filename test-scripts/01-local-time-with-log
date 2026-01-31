@@ -8,8 +8,8 @@
 *************************************************************************/
 (() => {
   /* ===== CONFIG ===== */
-  const TARGET_H = 17,
-    TARGET_M = 28,
+  const TARGET_H = 8,
+    TARGET_M = 0,
     TARGET_S = 0,
     TARGET_MS = 0; // target time local
   // Primary click target selector for the current page.
@@ -20,7 +20,7 @@
 
   // Manual timing adjustment
   // negative = earlier, positive = later
-  const CLICK_ADJUST_MS = -1150; // you’re testing -1000, -1500, etc.
+  const CLICK_ADJUST_MS = -990; // you’re testing -1000, -1500, etc.
 
   // Outcome detection window after click
   const OUTCOME_TIMEOUT_MS = 10000;  // Increased for peak traffic congestion
